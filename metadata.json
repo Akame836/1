@@ -1,0 +1,8 @@
+{
+  "name": "外卖助手",
+  "description": "An AI-powered assistant that scans takeout menus, analyzes nutritional content, tracks order history, and analyzes food photos directly.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
