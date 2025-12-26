@@ -41,5 +41,6 @@ export enum Page {
   HISTORY = 'HISTORY',
   NUTRITION = 'NUTRITION',
   ANALYZE_FOOD = 'ANALYZE_FOOD',
-  ROULETTE = 'ROULETTE' // 新增：幸运大转盘页面
+  ROULETTE = 'ROULETTE',
+  HELP = 'HELP' // 新增：部署指南页面
 }

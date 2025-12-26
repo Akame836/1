@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { OrderRecord, MealType } from '../types';
-import { analyzeHistory, parseOrderScreenshot, analyzeNutrition } from '../services/geminiService';
+import { parseOrderScreenshot, analyzeNutrition } from '../services/geminiService';
 
 interface OrderHistoryProps {
   orders: OrderRecord[];
@@ -68,7 +68,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ orders, onAddOrder }) => {
               ...order,
               mealType,
               date: new Date().toISOString()
-            });
+            } as OrderRecord);
           });
           setStatusMsg(`识别到 ${results.length} 笔实付订单！`);
           setTimeout(() => setStatusMsg(null), 3000);

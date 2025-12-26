@@ -24,25 +24,24 @@ const DishCatalog: React.FC<DishCatalogProps> = ({ dishes, onAddManual }) => {
     if (!mStore || !mName || !mPrice) return;
     
     setLoading(true);
-    try {
-      const nutrition = await analyzeNutrition(mName);
-      onAddManual({
-        id: `manual-${Date.now()}`,
-        storeName: mStore,
-        name: mName,
-        price: parseFloat(mPrice),
-        deliveryTimeMinutes: parseInt(mTime),
-        category: '手动录入',
-        nutrition
-      });
-      setMName('');
-      setMPrice('');
-      setShowAddForm(false);
-    } catch (e) {
-      alert('获取营养数据失败，请重试');
-    } finally {
-      setLoading(false);
-    }
+    // 即使 analyzeNutrition 内部报错（没 Key），它现在也会返回默认值
+    const nutrition = await analyzeNutrition(mName);
+    
+    onAddManual({
+      id: `manual-${Date.now()}`,
+      storeName: mStore,
+      name: mName,
+      price: parseFloat(mPrice),
+      deliveryTimeMinutes: parseInt(mTime),
+      category: '手动录入',
+      nutrition
+    });
+    
+    setMName('');
+    setMPrice('');
+    setMStore('');
+    setShowAddForm(false);
+    setLoading(false);
   };
 
   const filteredDishes = dishes
@@ -71,42 +70,45 @@ const DishCatalog: React.FC<DishCatalogProps> = ({ dishes, onAddManual }) => {
           onClick={() => setShowAddForm(!showAddForm)}
           className="w-full md:w-auto px-6 py-3 bg-gray-900 text-white text-sm rounded-xl font-bold hover:bg-black transition-colors"
         >
-          {showAddForm ? '取消录入' : '+ 手动补录菜品'}
+          {showAddForm ? '取消' : '+ 纯手动打字录入'}
         </button>
       </div>
 
       {showAddForm && (
-        <form onSubmit={handleManualAdd} className="bg-white p-5 rounded-2xl border border-orange-200 shadow-sm space-y-4 md:space-y-0 md:grid md:grid-cols-4 md:gap-4 animate-in slide-in-from-top duration-300">
-          <input value={mStore} onChange={e=>setMStore(e.target.value)} placeholder="店名" className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-orange-500" required />
-          <input value={mName} onChange={e=>setMName(e.target.value)} placeholder="菜名" className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-orange-500" required />
-          <input value={mPrice} onChange={e=>setMPrice(e.target.value)} type="number" step="0.01" placeholder="实付价 ¥" className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-orange-500" required />
-          <button disabled={loading} className="w-full bg-orange-600 text-white rounded-lg p-3 font-bold text-sm hover:bg-orange-700 disabled:opacity-50">
-            {loading ? '分析中...' : '确认录入'}
+        <form onSubmit={handleManualAdd} className="bg-white p-5 rounded-2xl border-2 border-orange-200 shadow-lg space-y-4 animate-in slide-in-from-top duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input value={mStore} onChange={e=>setMStore(e.target.value)} placeholder="店铺名称 (如: 麦当劳)" className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-orange-500" required />
+            <input value={mName} onChange={e=>setMName(e.target.value)} placeholder="菜品名称 (如: 巨无霸)" className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-orange-500" required />
+            <input value={mPrice} onChange={e=>setMPrice(e.target.value)} type="number" step="0.01" placeholder="实付价格 ¥" className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-orange-500" required />
+            <input value={mTime} onChange={e=>setMTime(e.target.value)} type="number" placeholder="配送时间 (分钟)" className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-orange-500" />
+          </div>
+          <button disabled={loading} className="w-full bg-orange-600 text-white rounded-lg p-3 font-bold text-sm hover:bg-orange-700 disabled:opacity-50 shadow-md">
+            {loading ? '保存中...' : '确认添加'}
           </button>
         </form>
       )}
 
       <div className="flex items-center space-x-4 border-b border-gray-100 pb-3 overflow-x-auto no-scrollbar">
-          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0">排序方式:</span>
-          <button onClick={() => setSortBy('price')} className={`text-xs font-bold shrink-0 ${sortBy === 'price' ? 'text-orange-600' : 'text-gray-400'}`}>最低实付价</button>
-          <button onClick={() => setSortBy('time')} className={`text-xs font-bold shrink-0 ${sortBy === 'time' ? 'text-orange-600' : 'text-gray-400'}`}>配送最快</button>
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider shrink-0">排序:</span>
+          <button onClick={() => setSortBy('price')} className={`text-xs font-bold shrink-0 ${sortBy === 'price' ? 'text-orange-600' : 'text-gray-400'}`}>最省钱</button>
+          <button onClick={() => setSortBy('time')} className={`text-xs font-bold shrink-0 ${sortBy === 'time' ? 'text-orange-600' : 'text-gray-400'}`}>最快速</button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
         {filteredDishes.map((dish) => (
           <div key={dish.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-            <div className="h-20 md:h-24 bg-orange-50 flex items-center justify-center relative">
-              <span className="text-2xl md:text-3xl">🍱</span>
-              <div className="absolute top-1 right-1 md:top-2 md:right-2 px-1.5 py-0.5 md:px-2 md:py-1 bg-green-500 rounded-lg text-[9px] md:text-[10px] font-bold text-white shadow-sm flex items-center">
-                 ¥{dish.price.toFixed(1)} <span className="ml-1 opacity-80 font-normal">实付</span>
+            <div className="h-20 bg-orange-50 flex items-center justify-center relative">
+              <span className="text-2xl">🍱</span>
+              <div className="absolute top-1 right-1 px-1.5 py-0.5 bg-green-500 rounded-lg text-[9px] font-bold text-white shadow-sm">
+                 ¥{dish.price.toFixed(1)}
               </div>
             </div>
-            <div className="p-3 md:p-4 flex-1 flex flex-col justify-between">
+            <div className="p-3 flex-1 flex flex-col justify-between">
               <div>
-                <h4 className="font-bold text-gray-800 text-xs md:text-sm line-clamp-1">{dish.name}</h4>
-                <p className="text-[9px] md:text-[10px] text-gray-400 line-clamp-1">{dish.storeName}</p>
+                <h4 className="font-bold text-gray-800 text-xs line-clamp-1">{dish.name}</h4>
+                <p className="text-[9px] text-gray-400 truncate">{dish.storeName}</p>
               </div>
-              <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50 text-[9px] md:text-[10px] text-gray-400">
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50 text-[9px] text-gray-400">
                 <span>🕒 {dish.deliveryTimeMinutes}m</span>
                 <span className="font-bold text-orange-400">{dish.nutrition.calories}cal</span>
               </div>
@@ -116,8 +118,8 @@ const DishCatalog: React.FC<DishCatalogProps> = ({ dishes, onAddManual }) => {
       </div>
       
       {filteredDishes.length === 0 && (
-        <div className="text-center py-12 md:py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
-          <p className="text-gray-400 text-sm px-4">菜品库空空如也。请先去“扫描录入”或在此手动添加菜品。</p>
+        <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+          <p className="text-gray-400 text-sm">还没有菜品。点击上方按钮手动输入吧！</p>
         </div>
       )}
     </div>

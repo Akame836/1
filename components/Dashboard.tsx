@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dish, OrderRecord, MealType } from '../types';
+import { Dish, OrderRecord, MealType, Page } from '../types';
 import { getDailySummary } from '../services/geminiService';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -53,7 +53,7 @@ const Dashboard: React.FC<DashboardProps> = ({ dishes, orders }) => {
   }, {});
 
   const chartData = Object.keys(categories).map(name => ({
-    name: name.substring(0, 6), // 移动端截断名称
+    name: name.substring(0, 6),
     fullName: name,
     count: categories[name]
   })).sort((a,b) => b.count - a.count).slice(0, 5);
@@ -77,23 +77,53 @@ const Dashboard: React.FC<DashboardProps> = ({ dishes, orders }) => {
 
   return (
     <div className="space-y-4 md:space-y-6">
+      {/* 新手引导卡片 */}
+      {dishes.length === 0 && (
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-3xl text-white shadow-lg relative overflow-hidden">
+          <div className="relative z-10">
+            <h3 className="text-lg font-bold mb-2">欢迎使用灵动外卖助手！🚀</h3>
+            <p className="text-sm opacity-90 mb-4">只需三步，开启智能点餐生活：</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                <div className="text-xl mb-1">📸</div>
+                <div className="text-xs font-bold">1. 扫描菜单</div>
+                <div className="text-[10px] opacity-70">上传外卖单识别价格</div>
+              </div>
+              <div className="bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                <div className="text-xl mb-1">🎡</div>
+                <div className="text-xs font-bold">2. 转盘决策</div>
+                <div className="text-[10px] opacity-70">纠结时让上天帮你选</div>
+              </div>
+              <div className="bg-white/10 p-3 rounded-xl backdrop-blur-sm">
+                <div className="text-xl mb-1">📊</div>
+                <div className="text-xs font-bold">3. 营养分析</div>
+                <div className="text-[10px] opacity-70">AI 帮你监控卡路里</div>
+              </div>
+            </div>
+          </div>
+          <div className="absolute top-[-20%] right-[-10%] text-9xl opacity-10">🍱</div>
+        </div>
+      )}
+
       {/* Top Decisions */}
       <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-orange-100">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-gray-800 flex items-center text-sm md:text-base">
             <span className="text-lg mr-2">💡</span> 今日灵感
           </h3>
-          <button onClick={refreshRecommendations} className="text-[10px] font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-full">换一批</button>
+          {dishes.length > 0 && (
+            <button onClick={refreshRecommendations} className="text-[10px] font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-full">换一批</button>
+          )}
         </div>
         
         {dishes.length === 0 ? (
           <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-            <p className="text-gray-400 text-xs">库里没菜，转不动啦！</p>
+            <p className="text-gray-400 text-xs italic">库里空空如也，请先扫描录入外卖单...</p>
           </div>
         ) : (
           <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar md:grid md:grid-cols-3 md:pb-0">
             {recommendations.map(dish => (
-              <div key={dish.id} className="min-w-[140px] md:min-w-0 p-3 bg-orange-50/50 rounded-xl border border-orange-100 flex flex-col justify-between">
+              <div key={dish.id} className="min-w-[140px] md:min-w-0 p-3 bg-orange-50/50 rounded-xl border border-orange-100 flex flex-col justify-between hover:border-orange-300 transition-colors">
                 <div>
                   <h4 className="font-bold text-gray-800 text-xs line-clamp-1">{dish.name}</h4>
                   <p className="text-[9px] text-gray-400 truncate">{dish.storeName}</p>

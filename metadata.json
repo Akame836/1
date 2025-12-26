@@ -1,6 +1,6 @@
 {
-  "name": "外卖助手",
-  "description": "An AI-powered assistant that scans takeout menus, analyzes nutritional content, tracks order history, and analyzes food photos directly.",
+  "name": "takeout-assistant",
+  "description": "基于 AI 的外卖智能助手。支持菜单扫描、实付价识别、营养分析、历史订单追踪及实物快拍分析。",
   "requestFramePermissions": [
     "camera",
     "microphone"

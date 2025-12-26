@@ -16,6 +16,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
       case Page.NUTRITION: return '营养分析';
       case Page.ROULETTE: return '灵动大转盘';
       case Page.ANALYZE_FOOD: return '实物快拍';
+      case Page.HELP: return '本地部署指南';
       default: return '灵动外卖';
     }
   };
